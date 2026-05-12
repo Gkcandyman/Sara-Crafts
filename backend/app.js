@@ -148,6 +148,11 @@ async function handleCreateUpiQr(req, res) {
     return;
   }
 
+  if (!isValidUpiId(upiId)) {
+    sendJson(res, 503, { error: 'Configured UPI ID is invalid. Please update CLIENT_UPI_ID in .env.' });
+    return;
+  }
+
   const payload = sanitizePayload(JSON.parse((await readBody(req)) || '{}'));
   const errors = validateUpiPayment(payload);
 
@@ -162,7 +167,6 @@ async function handleCreateUpiQr(req, res) {
     upiId,
     payeeName,
     amount,
-    transactionRef,
     note: payload.purpose || 'Sara Crafts payment',
   });
 
@@ -398,17 +402,25 @@ function validateUpiPayment(payload) {
   return errors;
 }
 
-function buildUpiPaymentUri({ upiId, payeeName, amount, transactionRef, note }) {
-  const params = new URLSearchParams({
-    pa: upiId,
-    pn: payeeName,
-    am: amount,
-    cu: 'INR',
-    tr: transactionRef,
-    tn: note,
-  });
+function buildUpiPaymentUri({ upiId, payeeName, amount, note }) {
+  const params = [
+    ['pa', upiId],
+    ['pn', payeeName],
+    ['am', amount],
+    ['cu', 'INR'],
+  ];
 
-  return `upi://pay?${params.toString()}`;
+  if (note) params.push(['tn', note.slice(0, 80)]);
+
+  const query = params
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join('&');
+
+  return `upi://pay?${query}`;
+}
+
+function isValidUpiId(upiId) {
+  return /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z][a-zA-Z0-9.-]{2,64}$/.test(String(upiId).trim());
 }
 
 function sanitizePayload(payload) {

@@ -163,6 +163,7 @@ function showPaymentQr(qrPayment) {
   const amount = document.getElementById('paymentQrAmount');
   const link = document.getElementById('googlePayLink');
   const upiId = document.getElementById('upiId');
+  const qrUpiId = document.getElementById('paymentQrUpiId');
   const payeeName = document.getElementById('upiPayeeName');
 
   if (!result || !image || !amount || !link) return;
@@ -172,6 +173,7 @@ function showPaymentQr(qrPayment) {
   link.href = qrPayment.paymentUri;
 
   if (upiId) upiId.textContent = qrPayment.upiId;
+  if (qrUpiId) qrUpiId.textContent = qrPayment.upiId;
   if (payeeName) payeeName.textContent = qrPayment.payeeName;
 
   result.hidden = false;

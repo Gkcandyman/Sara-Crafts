@@ -809,6 +809,18 @@ textarea:focus {
   font-size: 24px;
 }
 
+.payment-fallback {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.payment-fallback b {
+  color: var(--rose-dark);
+  overflow-wrap: anywhere;
+}
+
 .small-note {
   font-size: 12px;
 }
