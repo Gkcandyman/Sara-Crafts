@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sara Crafts - Orders, Appointments & Handmade Services</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../src/styles/style.css" />
+</head>
+<body>
+  <div id="siteLoader" class="site-loader" aria-label="Loading Sara Crafts">
+    <div class="site-loader-content">
+      <span class="site-loader-orbit" aria-hidden="true"></span>
+      <img src="assets/images/logo.png" alt="" />
+      <strong>Sara Crafts</strong>
+      <span>Handmade with love</span>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <a href="#home" class="brand">
+      <img src="assets/images/logo.png" alt="Sara Crafts Logo" />
+      <span>Sara Crafts</span>
+    </a>
+
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="#services" class="nav-link">Services</a>
+      <a href="#order" class="nav-link">Order</a>
+      <a href="#appointment" class="nav-link">Appointment</a>
+      <a href="#payment" class="nav-link">Payment</a>
+      <a href="#contact" class="nav-link">Contact</a>
+      <button onclick="openAdminLogin()" class="nav-button">Admin</button>
+      <button id="themeToggle" onclick="toggleTheme()" class="icon-button" aria-label="Toggle theme">🌙</button>
+    </nav>
+  </header>
+
+  <main id="home">
+    <section class="hero-section">
+      <div class="hero-copy" data-aos="fade-up">
+        <p class="eyebrow">Handmade gifts, bridal beauty, henna and event craft</p>
+        <h1>Sara Crafts</h1>
+        <p class="hero-text">Book services, place custom orders, ask questions, reserve appointments, and share payment details from one simple website.</p>
+        <div class="hero-actions">
+          <a href="#order" class="primary-action">Start an Order</a>
+          <a href="#appointment" class="secondary-action">Book Appointment</a>
+        </div>
+        <div class="hero-stats" aria-label="Sara Crafts highlights">
+          <div><strong>7+</strong><span>Creative services</span></div>
+          <div><strong>Custom</strong><span>Made to request</span></div>
+          <div><strong>Direct</strong><span>WhatsApp support</span></div>
+        </div>
+      </div>
+
+      <div class="hero-gallery" aria-label="Sara Crafts product gallery">
+        <img src="assets/images 2/2.jpeg" alt="Bridal makeup by Sara Crafts" class="hero-photo hero-photo-large" />
+        <img src="assets/images 2/3.1.jpeg" alt="Customized gifts by Sara Crafts" class="hero-photo" />
+        <img src="assets/images 2/4.1.jpeg" alt="Bridal mehendi by Sara Crafts" class="hero-photo" />
+      </div>
+    </section>
+
+    <section id="services" class="content-section">
+      <div class="section-heading">
+        <p class="eyebrow">Choose your service</p>
+        <h2>Services you can book online</h2>
+      </div>
+
+      <div class="service-grid">
+        <article class="service-card" data-service="Decorated Plates" data-price="499">
+          <img src="assets/images 2/1.jpeg" alt="Decorated plates" />
+          <div>
+            <h3>Decorated Plates</h3>
+            <p>Wedding, pooja and gifting plates made with custom colors and names.</p>
+            <strong>From Rs.499</strong>
+          </div>
+          <button onclick="selectService('Decorated Plates', 'order')">Order</button>
+        </article>
+
+        <article class="service-card" data-service="Bridal Makeup" data-price="2999">
+          <img src="assets/images 2/2.1.jpeg" alt="Bridal makeup" />
+          <div>
+            <h3>Bridal Makeup</h3>
+            <p>Traditional bridal makeover, styling support and complete occasion look.</p>
+            <strong>From Rs.2999</strong>
+          </div>
+          <button onclick="selectService('Bridal Makeup', 'appointment')">Book</button>
+        </article>
+
+        <article class="service-card" data-service="Customized Gifts" data-price="799">
+          <img src="assets/images 2/3.jpeg" alt="Customized gifts" />
+          <div>
+            <h3>Customized Gifts</h3>
+            <p>Handmade keepsakes with names, themes, colors and personal messages.</p>
+            <strong>From Rs.799</strong>
+          </div>
+          <button onclick="selectService('Customized Gifts', 'order')">Order</button>
+        </article>
+
+        <article class="service-card" data-service="Henna Mix" data-price="799">
+          <img src="assets/images 2/4.jpeg" alt="Henna mix" />
+          <div>
+            <h3>Henna Mix</h3>
+            <p>Fresh handmade henna for bridal prep, events and personal use.</p>
+            <strong>From Rs.799</strong>
+          </div>
+          <button onclick="selectService('Henna Mix', 'order')">Order</button>
+        </article>
+
+        <article class="service-card" data-service="Bridal Mehandi" data-price="0">
+          <img src="assets/images 2/5.jpeg" alt="Bridal mehandi" />
+          <div>
+            <h3>Bridal Mehandi</h3>
+            <p>Detailed bridal designs with package pricing based on design depth.</p>
+            <strong>Package pricing</strong>
+          </div>
+          <button onclick="selectService('Bridal Mehandi', 'appointment')">Book</button>
+        </article>
+
+        <article class="service-card" data-service="Henna Cones" data-price="799">
+          <img src="assets/images 2/6.jpeg" alt="Henna cones" />
+          <div>
+            <h3>Henna Cones</h3>
+            <p>Premium cones for events, learners and artists.</p>
+            <strong>From Rs.799</strong>
+          </div>
+          <button onclick="selectService('Henna Cones', 'order')">Order</button>
+        </article>
+
+        <article class="service-card" data-service="Saree Pre Pleating" data-price="600">
+          <img src="assets/images 2/7.jpeg" alt="Saree pre pleating" />
+          <div>
+            <h3>Saree Pre Pleating</h3>
+            <p>Clean pre-pleating for bridal, party and event saree looks.</p>
+            <strong>From Rs.600</strong>
+          </div>
+          <button onclick="selectService('Saree Pre Pleating', 'appointment')">Book</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="order" class="workflow-section">
+      <div class="section-heading">
+        <p class="eyebrow">Place an order</p>
+        <h2>Tell us what you want made</h2>
+      </div>
+
+      <form id="orderForm" class="business-form">
+        <div class="form-panel-header">
+          <span>Custom order request</span>
+          <h3>Share the idea. We will shape it beautifully.</h3>
+          <p>Tell us the service, occasion, colors, quantity and date. A Sara Crafts team member will confirm the final design and price.</p>
+        </div>
+        <div class="form-grid">
+          <label>Name<input name="name" required placeholder="Your full name" /></label>
+          <label>Phone / WhatsApp<input name="phone" required placeholder="Mobile number" /></label>
+          <label>Service
+            <select name="service" required>
+              <option value="">Select service</option>
+              <option>Decorated Plates</option>
+              <option>Customized Gifts</option>
+              <option>Henna Mix</option>
+              <option>Henna Cones</option>
+              <option>Saree Pre Pleating</option>
+              <option>Bridal Makeup</option>
+              <option>Bridal Mehandi</option>
+            </select>
+          </label>
+          <label>Budget<input name="budget" placeholder="Example: Rs.1500" /></label>
+          <label class="span-2">Delivery / Event Date<input name="neededBy" type="date" /></label>
+          <label class="span-2">Order Details<textarea name="details" required placeholder="Colors, names, quantity, design idea, delivery place..."></textarea></label>
+        </div>
+        <button type="submit" class="primary-action">Submit Order Request</button>
+        <p class="form-status" id="orderStatus" role="status"></p>
+      </form>
+    </section>
+
+    <section id="appointment" class="workflow-section alt">
+      <div class="section-heading">
+        <p class="eyebrow">Reserve a slot</p>
+        <h2>Book an appointment</h2>
+      </div>
+
+      <form id="appointmentForm" class="business-form">
+        <div class="form-panel-header">
+          <span>Personal booking</span>
+          <h3>Pick a preferred slot for your service.</h3>
+          <p>Use this for bridal makeup, mehandi, saree pre-pleating, or a design consultation.</p>
+        </div>
+        <div class="form-grid">
+          <label>Name<input name="name" required placeholder="Your full name" /></label>
+          <label>Phone / WhatsApp<input name="phone" required placeholder="Mobile number" /></label>
+          <label>Service
+            <select name="service" required>
+              <option value="">Select service</option>
+              <option>Bridal Makeup</option>
+              <option>Bridal Mehandi</option>
+              <option>Saree Pre Pleating</option>
+              <option>Design Consultation</option>
+            </select>
+          </label>
+          <label>Preferred Date<input name="date" type="date" required /></label>
+          <label>Preferred Time<input name="time" type="time" required /></label>
+          <label>Location<input name="location" placeholder="Area / venue" /></label>
+          <label class="span-2">Notes<textarea name="notes" placeholder="Event time, package needs, skin/hair notes, design ideas..."></textarea></label>
+        </div>
+        <button type="submit" class="primary-action">Request Appointment</button>
+        <p class="form-status" id="appointmentStatus" role="status"></p>
+      </form>
+    </section>
+
+    <section id="payment" class="payment-section">
+      <div class="section-heading">
+        <p class="eyebrow">Payment receiving</p>
+        <h2>Share payment details after transfer</h2>
+      </div>
+
+      <div class="payment-layout">
+        <div class="payment-card">
+          <h3>Google Pay / UPI QR</h3>
+          <p>Generate a payment QR for the client UPI account. Scan it with Google Pay or any UPI app, then submit the payment reference for confirmation.</p>
+          <div class="payment-method">
+            <span>Payee</span>
+            <strong id="upiPayeeName">Sara Crafts</strong>
+          </div>
+          <form id="googlePayQrForm" class="gateway-payment-form">
+            <label>Name<input name="name" required placeholder="Paid by" /></label>
+            <label>Phone<input name="phone" required placeholder="Mobile number" /></label>
+            <label>Amount<input name="amount" required type="number" min="1" placeholder="Amount to pay" /></label>
+            <label>Purpose<input name="purpose" placeholder="Order advance, appointment, balance..." /></label>
+            <button type="submit" class="primary-action">Generate Payment QR</button>
+            <p class="form-status" id="googlePayQrStatus" role="status"></p>
+          </form>
+          <div id="paymentQrResult" class="payment-qr-result" hidden>
+            <img id="paymentQrImage" alt="Google Pay UPI payment QR code" />
+            <div>
+              <span>Amount</span>
+              <strong id="paymentQrAmount">Rs.0.00</strong>
+              <a id="googlePayLink" class="secondary-action" href="#" target="_blank" rel="noopener">Open Google Pay</a>
+            </div>
+          </div>
+          <div class="payment-method">
+            <span>UPI ID</span>
+            <strong id="upiId">lookup.gk-2@okaxis</strong>
+          </div>
+        </div>
+
+        <form id="paymentForm" class="business-form">
+          <div class="form-panel-header">
+            <span>Payment confirmation</span>
+            <h3>Send your payment reference safely.</h3>
+            <p>After submitting, we will verify the payment and update your order or booking status.</p>
+          </div>
+          <div class="form-grid">
+            <label>Name<input name="name" required placeholder="Paid by" /></label>
+            <label>Phone<input name="phone" required placeholder="Mobile number" /></label>
+            <label>Amount<input name="amount" required type="number" min="1" placeholder="Amount paid" /></label>
+            <label>Reference ID<input name="reference" required placeholder="UPI / bank reference" /></label>
+            <label class="span-2">Purpose<input name="purpose" placeholder="Order, appointment advance, balance payment..." /></label>
+          </div>
+          <button type="submit" class="primary-action">Submit Payment Proof</button>
+          <p class="form-status" id="paymentStatus" role="status"></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="contact" class="contact-section">
+      <div>
+        <p class="eyebrow">Need help choosing?</p>
+        <h2>Send an enquiry</h2>
+        <p>Ask for price, availability, custom design suggestions or package details.</p>
+      </div>
+
+      <form id="enquiryForm" class="business-form compact">
+        <div class="form-panel-header">
+          <span>Quick enquiry</span>
+          <h3>Ask before you book.</h3>
+        </div>
+        <label>Name<input name="name" required placeholder="Your name" /></label>
+        <label>Phone / WhatsApp<input name="phone" required placeholder="Mobile number" /></label>
+        <label>Question<textarea name="message" required placeholder="What would you like to know?"></textarea></label>
+        <button type="submit" class="primary-action">Send Enquiry</button>
+        <p class="form-status" id="enquiryStatus" role="status"></p>
+      </form>
+    </section>
+  </main>
+
+  <div id="adminLoginModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full text-center">
+      <h2 class="text-xl font-bold text-rose-600 mb-4">Admin Login</h2>
+      <input type="password" id="adminLoginInput" placeholder="Enter password" class="w-full px-4 py-2 mb-4 border rounded focus:outline-none">
+      <div class="flex justify-between gap-3">
+        <button onclick="submitAdminLogin()" class="flex-1 bg-rose-600 text-white py-2 rounded hover:bg-rose-700">Login</button>
+        <button onclick="closeAdminLogin()" class="flex-1 bg-gray-300 text-gray-800 py-2 rounded hover:bg-gray-400">Cancel</button>
+      </div>
+      <p id="loginError" class="text-red-500 mt-3 hidden">Incorrect password!</p>
+    </div>
+  </div>
+
+  <div id="thankYouModal" class="thank-you-modal" aria-hidden="true">
+    <div class="thank-you-card" role="dialog" aria-modal="true" aria-labelledby="thankYouTitle">
+      <div class="confetti-field" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="success-mark" aria-hidden="true">✓</div>
+      <div class="micro-logo">
+        <svg width="150" height="175" viewBox="0 0 300 350">
+          <defs>
+            <style>
+              .micro-face-outline {
+                stroke-dasharray: 471;
+                stroke-dashoffset: 0; /* already drawn */
+              }
+              .micro-lips {
+                stroke-dasharray: 180;
+                stroke-dashoffset: 180;
+                animation: draw 0.4s ease-in-out forwards;
+              }
+              .micro-logo-text {
+                opacity: 0;
+                animation: fadeIn 0.5s ease-in-out 0.4s forwards;
+              }
+              @keyframes draw {
+                to {
+                  stroke-dashoffset: 0;
+                }
+              }
+              @keyframes fadeIn {
+                to {
+                  opacity: 1;
+                }
+              }
+            </style>
+          </defs>
+          <path class="micro-face-outline" d="M 75 150 Q 75 75 150 75 Q 225 75 225 150 Q 225 225 150 225 Q 75 225 75 150 Z" stroke="#D4AF37" stroke-width="4" fill="none" />
+          <path class="micro-lips" d="M 120 180 Q 150 195 180 180" stroke="#FFB6C1" stroke-width="4" fill="none" />
+          <text x="150" y="320" text-anchor="middle" class="micro-logo-text" fill="#D4AF37" font-family="Great Vibes, cursive" font-size="24">SARACRAFTS</text>
+        </svg>
+      </div>
+      <p class="eyebrow">Request received</p>
+      <h2 id="thankYouTitle">Thank you for choosing Sara Crafts</h2>
+      <p id="thankYouMessage">Your request has been saved. Our team will contact you shortly.</p>
+      <div class="request-receipt">
+        <span>Reference ID</span>
+        <strong id="thankYouRef">SC-NEW</strong>
+      </div>
+      <button type="button" class="primary-action" onclick="closeThankYou()">Continue Browsing</button>
+    </div>
+  </div>
+
+  <button id="backToTop" onclick="scrollToTop()">Top</button>
+
+  <a href="https://wa.me/919791315227?text=Hi%20Sara%20Crafts!%20I%20want%20to%20book%20a%20service." class="whatsapp-float" target="_blank" title="Chat on WhatsApp">
+    <img src="https://img.icons8.com/color/48/000000/whatsapp--v1.png" alt="WhatsApp">
+  </a>
+
+  <a href="https://instagram.com/saracrafts2020" class="insta-float" target="_blank" title="Follow us on Instagram">
+    <img src="https://img.icons8.com/fluency/48/instagram-new.png" alt="Instagram">
+  </a>
+
+  <script src="../src/main.js"></script>
+</body>
+</html>

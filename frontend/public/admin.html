@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sara Crafts Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../src/styles/admin.css" />
+</head>
+<body class="bg-rose-50 text-gray-800 font-sans">
+  <main class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <p class="eyebrow">Sara Crafts Admin</p>
+        <h1>Business Requests</h1>
+      </div>
+      <div class="admin-actions">
+        <a href="land.html" class="admin-link">Website</a>
+        <button onclick="toggleTheme()" id="themeToggle">Moon</button>
+        <button onclick="togglePasswordChange()">Change Password</button>
+      </div>
+    </header>
+
+    <section class="metric-grid">
+      <article><span>Total Orders</span><strong id="orderCount">0</strong></article>
+      <article><span>Appointments</span><strong id="appointmentCount">0</strong></article>
+      <article><span>Enquiries</span><strong id="enquiryCount">0</strong></article>
+      <article><span>Payments</span><strong>Rs.<span id="totalProfit">0</span></strong></article>
+    </section>
+
+    <section id="passwordChange" class="admin-card hidden">
+      <label>New admin password
+        <input type="password" id="newPassword" placeholder="Enter new password">
+      </label>
+      <button onclick="saveNewPassword()">Save New Password</button>
+    </section>
+
+    <section class="admin-card">
+      <div class="table-heading">
+        <h2>Orders</h2>
+        <span id="ordersStatus"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Service</th>
+              <th>Budget</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="orderTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-grid">
+      <article class="admin-card">
+        <h2>Appointments</h2>
+        <div id="appointmentList" class="record-list"></div>
+      </article>
+
+      <article class="admin-card">
+        <h2>Enquiries</h2>
+        <div id="enquiryList" class="record-list"></div>
+      </article>
+    </section>
+
+    <section class="admin-card">
+      <h2>Payments</h2>
+      <div id="paymentList" class="record-list"></div>
+    </section>
+
+    <div class="logout-row">
+      <button onclick="logoutAdmin()" class="logout-button relative overflow-hidden">
+        Logout
+        <span class="magic-ring"></span>
+      </button>
+    </div>
+  </main>
+
+  <script src="../src/pages/admin.js"></script>
+</body>
+</html>

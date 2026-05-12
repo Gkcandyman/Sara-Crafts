@@ -1,0 +1,15 @@
+{
+  "name": "sara-crafts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node backend/server.js",
+    "backend": "node backend/server.js",
+    "frontend": "open frontend/public/index.html",
+    "db:schema": "/usr/local/mysql/bin/mysql -h127.0.0.1 -P3306 -u$DB_USER -p$DB_PASSWORD < backend/config/schema.sql"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "mysql2": "^3.22.3"
+  }
+}

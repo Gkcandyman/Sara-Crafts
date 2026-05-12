@@ -1,0 +1,8 @@
+{
+  "name": "sara-crafts-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "open public/index.html"
+  }
+}

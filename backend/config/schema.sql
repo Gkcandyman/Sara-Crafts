@@ -1,0 +1,51 @@
+CREATE DATABASE IF NOT EXISTS sara_crafts;
+USE sara_crafts;
+
+CREATE TABLE IF NOT EXISTS orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  request_id VARCHAR(40) NOT NULL UNIQUE,
+  name VARCHAR(150) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  service VARCHAR(120) NOT NULL,
+  budget VARCHAR(80),
+  needed_by DATE,
+  details TEXT,
+  status VARCHAR(40) DEFAULT 'new',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS appointments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  request_id VARCHAR(40) NOT NULL UNIQUE,
+  name VARCHAR(150) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  service VARCHAR(120) NOT NULL,
+  preferred_date DATE,
+  preferred_time TIME,
+  location VARCHAR(255),
+  notes TEXT,
+  status VARCHAR(40) DEFAULT 'new',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS enquiries (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  request_id VARCHAR(40) NOT NULL UNIQUE,
+  name VARCHAR(150) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  message TEXT NOT NULL,
+  status VARCHAR(40) DEFAULT 'new',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  request_id VARCHAR(40) NOT NULL UNIQUE,
+  name VARCHAR(150) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  reference_id VARCHAR(160) NOT NULL,
+  purpose VARCHAR(255),
+  status VARCHAR(40) DEFAULT 'pending_verification',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
