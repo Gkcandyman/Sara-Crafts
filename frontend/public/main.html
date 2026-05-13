@@ -239,14 +239,14 @@
         <form id="paymentForm" class="business-form">
           <div class="form-panel-header">
             <span>Payment confirmation</span>
-            <h3>Send your payment reference safely.</h3>
-            <p>After submitting, we will verify the payment and update your order or booking status.</p>
+            <h3>Submit your payment screenshot.</h3>
+            <p>Upload the UPI payment screenshot so we can verify and update your order or booking status.</p>
           </div>
           <div class="form-grid">
             <label>Name<input name="name" required placeholder="Paid by" /></label>
             <label>Phone<input name="phone" required placeholder="Mobile number" /></label>
             <label>Amount<input name="amount" required type="number" min="1" placeholder="Amount paid" /></label>
-            <label>Reference ID<input name="reference" required placeholder="UPI / bank reference" /></label>
+            <label class="span-2">Payment Screenshot<input name="screenshot" required type="file" accept="image/png,image/jpeg,image/webp" /></label>
             <label class="span-2">Purpose<input name="purpose" placeholder="Order, appointment advance, balance payment..." /></label>
           </div>
           <button type="submit" class="primary-action">Submit Payment Proof</button>
@@ -264,8 +264,8 @@
             <span>Amount</span>
             <strong id="popupPaymentAmount">Rs.0.00</strong>
           </div>
-          <p>Enter the shown amount in your UPI app. After paying, continue to the form and submit the UPI reference ID for verification.</p>
-          <button type="button" class="primary-action" onclick="continueToPaymentReference()">Enter Payment Reference</button>
+          <p>Enter the shown amount in your UPI app. After paying, continue to the form and upload the payment screenshot.</p>
+          <button type="button" class="primary-action" onclick="continueToPaymentProof()">Upload Payment Screenshot</button>
         </div>
       </div>
     </section>
@@ -317,7 +317,7 @@
       <h2 id="thankYouTitle">Thank you for choosing Sara Crafts</h2>
       <p id="thankYouMessage">Your request has been saved. Our team will contact you shortly.</p>
       <div class="request-receipt">
-        <span>Reference ID</span>
+        <span>Submission ID</span>
         <strong id="thankYouRef">SC-NEW</strong>
       </div>
       <button type="button" class="primary-action" onclick="closeThankYou()">Continue Browsing</button>

@@ -94,7 +94,7 @@ const collectionRoutes = {
           record.name,
           record.phone,
           Number(record.amount || 0),
-          record.reference,
+          record.reference || record.screenshotName || 'screenshot-proof',
           record.purpose || null,
           'pending_verification',
         ],
@@ -326,6 +326,7 @@ function formatNotification(route, record) {
   if (record.location) lines.push(`Location: ${record.location}`);
   if (record.amount) lines.push(`Amount: Rs.${record.amount}`);
   if (record.reference) lines.push(`Payment Reference: ${record.reference}`);
+  if (record.screenshotName) lines.push(`Payment Screenshot: ${record.screenshotName}`);
   if (record.purpose) lines.push(`Purpose: ${record.purpose}`);
   if (record.details) lines.push(`Details: ${record.details}`);
   if (record.notes) lines.push(`Notes: ${record.notes}`);
@@ -376,8 +377,8 @@ function validatePayload(pathname, payload) {
     if (!payload.amount || Number(payload.amount) <= 0) {
       errors.push('Valid payment amount is required');
     }
-    if (!payload.reference) {
-      errors.push('Payment reference is required');
+    if (!payload.screenshotData || !payload.screenshotName) {
+      errors.push('Payment screenshot is required');
     }
   }
 
@@ -445,7 +446,7 @@ function readBody(req) {
 
     req.on('data', chunk => {
       body += chunk;
-      if (body.length > 1_000_000) {
+      if (body.length > 6_000_000) {
         req.destroy();
         reject(new Error('Body too large'));
       }

@@ -67,7 +67,7 @@ async function loadDashboard() {
       item.name,
       item.phone,
       `Rs.${item.amount || 0}`,
-      item.reference,
+      item.screenshotName || item.reference,
       item.purpose,
     ]);
   } catch (error) {

@@ -76,7 +76,7 @@ function setupScrollState() {
 function setupBusinessForms() {
   bindForm('orderForm', '/api/orders', 'orderStatus', 'Order request received. We will contact you shortly.', 'Order request');
   bindForm('appointmentForm', '/api/appointments', 'appointmentStatus', 'Appointment request received. We will confirm availability shortly.', 'Appointment request');
-  bindForm('paymentForm', '/api/payments', 'paymentStatus', 'Payment proof received. We will verify and update you shortly.', 'Payment proof');
+  bindForm('paymentForm', '/api/payments', 'paymentStatus', 'Payment received successfully. We will verify and update you shortly.', 'Payment');
   bindForm('enquiryForm', '/api/enquiries', 'enquiryStatus', 'Enquiry received. We will reply soon.', 'Enquiry');
 }
 
@@ -90,19 +90,12 @@ function bindForm(formId, endpoint, statusId, successMessage, requestType) {
     status.classList.remove('error');
     status.textContent = 'Submitting...';
 
-    const payload = Object.fromEntries(new FormData(form).entries());
-    payload.source = formId;
-
-    if (formId === 'paymentForm' && (!payload.reference || String(payload.reference).trim().length < 4)) {
-      status.classList.add('error');
-      status.textContent = 'Enter the UPI transaction/reference ID before submitting payment proof.';
-      form.querySelector('[name="reference"]')?.focus();
-      return;
-    }
-
     setSubmitState(form, true);
 
     try {
+      const payload = await buildFormPayload(form, formId);
+      payload.source = formId;
+
       const response = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -130,6 +123,48 @@ function bindForm(formId, endpoint, statusId, successMessage, requestType) {
     } finally {
       setSubmitState(form, false);
     }
+  });
+}
+
+async function buildFormPayload(form, formId) {
+  const formData = new FormData(form);
+  const payload = {};
+
+  for (const [key, value] of formData.entries()) {
+    if (!(value instanceof File)) {
+      payload[key] = value;
+    }
+  }
+
+  if (formId === 'paymentForm') {
+    const screenshot = formData.get('screenshot');
+
+    if (!(screenshot instanceof File) || !screenshot.name) {
+      throw new Error('Upload the payment screenshot before submitting proof');
+    }
+
+    if (!screenshot.type.startsWith('image/')) {
+      throw new Error('Payment proof must be an image screenshot');
+    }
+
+    if (screenshot.size > 4 * 1024 * 1024) {
+      throw new Error('Payment screenshot must be under 4 MB');
+    }
+
+    payload.screenshotName = screenshot.name;
+    payload.screenshotType = screenshot.type;
+    payload.screenshotData = await readFileAsDataUrl(screenshot);
+  }
+
+  return payload;
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Could not read the selected screenshot'));
+    reader.readAsDataURL(file);
   });
 }
 
@@ -162,7 +197,7 @@ function setupGooglePayQrForm() {
     }
 
     showPaymentQrPopup(payload);
-    status.textContent = 'QR opened. After paying, enter the UPI reference ID below.';
+    status.textContent = 'QR opened. After paying, upload the payment screenshot below.';
   });
 }
 
@@ -187,7 +222,7 @@ function closePaymentQrPopup() {
   document.body.classList.remove('modal-open');
 }
 
-function continueToPaymentReference() {
+function continueToPaymentProof() {
   const qrForm = document.getElementById('googlePayQrForm');
   const paymentForm = document.getElementById('paymentForm');
   const status = document.getElementById('googlePayQrStatus');
@@ -201,10 +236,10 @@ function continueToPaymentReference() {
   }
 
   closePaymentQrPopup();
-  if (status) status.textContent = 'Now submit the UPI reference ID below. No proof is saved until that form is submitted.';
+  if (status) status.textContent = 'Now upload the payment screenshot below. No proof is saved until that form is submitted.';
   paymentForm?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   window.setTimeout(() => {
-    paymentForm?.querySelector('[name="reference"]')?.focus();
+    paymentForm?.querySelector('[name="screenshot"]')?.focus();
   }, 350);
 }
 
@@ -254,7 +289,9 @@ function showThankYou({ requestType, referenceId, message }) {
   const modal = document.getElementById('thankYouModal');
   if (!modal) return;
 
-  document.getElementById('thankYouTitle').textContent = `${requestType} received`;
+  document.getElementById('thankYouTitle').textContent = requestType === 'Payment'
+    ? 'Payment Received Successfully'
+    : `${requestType} received`;
   document.getElementById('thankYouMessage').textContent = message;
   document.getElementById('thankYouRef').textContent = referenceId;
   modal.classList.add('is-visible');
