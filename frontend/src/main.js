@@ -89,10 +89,18 @@ function bindForm(formId, endpoint, statusId, successMessage, requestType) {
     event.preventDefault();
     status.classList.remove('error');
     status.textContent = 'Submitting...';
-    setSubmitState(form, true);
 
     const payload = Object.fromEntries(new FormData(form).entries());
     payload.source = formId;
+
+    if (formId === 'paymentForm' && (!payload.reference || String(payload.reference).trim().length < 4)) {
+      status.classList.add('error');
+      status.textContent = 'Enter the UPI transaction/reference ID before submitting payment proof.';
+      form.querySelector('[name="reference"]')?.focus();
+      return;
+    }
+
+    setSubmitState(form, true);
 
     try {
       const response = await fetch(`${API_BASE}${endpoint}`, {
@@ -154,7 +162,7 @@ function setupGooglePayQrForm() {
     }
 
     showPaymentQrPopup(payload);
-    status.textContent = 'QR opened. Scan it and tap payment completed after paying.';
+    status.textContent = 'QR opened. After paying, enter the UPI reference ID below.';
   });
 }
 
@@ -179,7 +187,7 @@ function closePaymentQrPopup() {
   document.body.classList.remove('modal-open');
 }
 
-function markPaymentCompleted() {
+function continueToPaymentReference() {
   const qrForm = document.getElementById('googlePayQrForm');
   const paymentForm = document.getElementById('paymentForm');
   const status = document.getElementById('googlePayQrStatus');
@@ -193,8 +201,11 @@ function markPaymentCompleted() {
   }
 
   closePaymentQrPopup();
-  if (status) status.textContent = 'Payment marked completed. Submit the UPI reference ID below.';
-  paymentForm?.querySelector('[name="reference"]')?.focus();
+  if (status) status.textContent = 'Now submit the UPI reference ID below. No proof is saved until that form is submitted.';
+  paymentForm?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  window.setTimeout(() => {
+    paymentForm?.querySelector('[name="reference"]')?.focus();
+  }, 350);
 }
 
 function setupPaymentQrPopup() {
