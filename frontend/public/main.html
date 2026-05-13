@@ -217,31 +217,22 @@
       <div class="payment-layout">
         <div class="payment-card">
           <h3>Google Pay / UPI QR</h3>
-          <p>Generate a payment QR for the client UPI account. Scan it with Google Pay or any UPI app, then submit the payment reference for confirmation.</p>
+          <p>Open the client Google Pay QR, scan it with any UPI app, then submit the payment reference for confirmation.</p>
           <div class="payment-method">
             <span>Payee</span>
-            <strong id="upiPayeeName">Sara Crafts</strong>
+            <strong id="upiPayeeName">A Devaraj</strong>
           </div>
           <form id="googlePayQrForm" class="gateway-payment-form">
             <label>Name<input name="name" required placeholder="Paid by" /></label>
             <label>Phone<input name="phone" required placeholder="Mobile number" /></label>
             <label>Amount<input name="amount" required type="number" min="1" placeholder="Amount to pay" /></label>
             <label>Purpose<input name="purpose" placeholder="Order advance, appointment, balance..." /></label>
-            <button type="submit" class="primary-action">Generate Payment QR</button>
+            <button type="submit" class="primary-action">Generate QR</button>
             <p class="form-status" id="googlePayQrStatus" role="status"></p>
           </form>
-          <div id="paymentQrResult" class="payment-qr-result" hidden>
-            <img id="paymentQrImage" alt="Google Pay UPI payment QR code" />
-            <div>
-              <span>Amount</span>
-              <strong id="paymentQrAmount">Rs.0.00</strong>
-              <p class="payment-fallback">If scanning fails, open the UPI app or pay manually to <b id="paymentQrUpiId">lookup.gk-2@okaxis</b>.</p>
-              <a id="googlePayLink" class="secondary-action" href="#" target="_blank" rel="noopener">Open UPI App</a>
-            </div>
-          </div>
           <div class="payment-method">
             <span>UPI ID</span>
-            <strong id="upiId">lookup.gk-2@okaxis</strong>
+            <strong id="upiId">devaraj2582001-3@okicici</strong>
           </div>
         </div>
 
@@ -261,6 +252,21 @@
           <button type="submit" class="primary-action">Submit Payment Proof</button>
           <p class="form-status" id="paymentStatus" role="status"></p>
         </form>
+      </div>
+
+      <div id="paymentQrPopup" class="payment-qr-popup" aria-hidden="true">
+        <div class="payment-qr-dialog" role="dialog" aria-modal="true" aria-labelledby="paymentQrPopupTitle">
+          <button type="button" class="popup-close" aria-label="Close payment QR" onclick="closePaymentQrPopup()">x</button>
+          <p class="eyebrow">Scan to pay</p>
+          <h3 id="paymentQrPopupTitle">Google Pay / UPI QR</h3>
+          <img src="assets/images/google-pay-qr.jpeg" alt="Google Pay UPI QR for A Devaraj" />
+          <div class="popup-payment-meta">
+            <span>Amount</span>
+            <strong id="popupPaymentAmount">Rs.0.00</strong>
+          </div>
+          <p>Enter the shown amount in your UPI app. After paying, tap payment completed and submit the UPI reference ID for verification.</p>
+          <button type="button" class="primary-action" onclick="markPaymentCompleted()">Payment Completed</button>
+        </div>
       </div>
     </section>
 

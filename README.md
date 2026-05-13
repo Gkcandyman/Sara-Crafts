@@ -8,7 +8,7 @@ Run the website:
 1. Copy `.env.example` to `.env` and set your MySQL password.
 2. Start MySQL from System Settings or with `/usr/local/mysql/support-files/mysql.server start`.
 3. Run `npm start`.
-4. Open `http://127.0.0.1:5000`.
+4. Open `http://127.0.0.1:5050`.
 
 To enable Google Pay / UPI QR payments, add the client UPI details to `.env`:
 

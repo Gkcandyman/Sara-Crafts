@@ -669,6 +669,112 @@ textarea:focus {
   font-size: 24px;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
+.payment-qr-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(42, 29, 36, 0.62);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s ease;
+}
+
+.payment-qr-popup.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.payment-qr-dialog {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 430px);
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+  padding: clamp(22px, 5vw, 34px);
+  border: 1px solid rgba(234, 211, 217, 0.95);
+  border-radius: 20px;
+  background: #fffdfb;
+  box-shadow: 0 34px 90px rgba(42, 29, 36, 0.3);
+  text-align: center;
+  transform: translateY(18px) scale(0.96);
+  transition: transform 0.28s ease;
+}
+
+.payment-qr-popup.is-visible .payment-qr-dialog {
+  transform: translateY(0) scale(1);
+}
+
+.payment-qr-dialog h3 {
+  margin: 0 0 16px;
+  color: var(--rose-dark);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(30px, 8vw, 42px);
+  line-height: 1;
+}
+
+.payment-qr-dialog img {
+  width: min(100%, 300px);
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #eef2fb;
+}
+
+.payment-qr-dialog p:not(.eyebrow) {
+  margin: 16px 0 18px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff0f4;
+  color: var(--rose-dark);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.popup-payment-meta {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 300px);
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px dashed var(--rose);
+  border-radius: 12px;
+  background: #fff7f9;
+}
+
+.popup-payment-meta span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.popup-payment-meta strong {
+  color: var(--rose-dark);
+  font-size: 24px;
+}
+
 .confetti-field span {
   position: absolute;
   top: -18px;

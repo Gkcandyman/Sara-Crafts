@@ -22,10 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
   setupScrollState();
   setupBusinessForms();
   setupGooglePayQrForm();
+  setupPaymentQrPopup();
   setupThankYouModal();
 });
 
 function shouldReturnToLanding() {
+  if (window.location.hash) {
+    sessionStorage.removeItem(LANDING_ENTRY_KEY);
+    return false;
+  }
+
   const navigationEntry = performance.getEntriesByType('navigation')[0];
   const isReload = navigationEntry?.type === 'reload' || performance.navigation?.type === 1;
   const hasLandingPass = sessionStorage.getItem(LANDING_ENTRY_KEY) === 'true';
@@ -43,7 +49,7 @@ function shouldReturnToLanding() {
 
   sessionStorage.removeItem(LANDING_ENTRY_KEY);
 
-  return isReload || (!hasLandingPass && !cameFromLanding);
+  return !isReload && !hasLandingPass && !cameFromLanding;
 }
 
 function setupScrollState() {
@@ -127,56 +133,85 @@ function setupGooglePayQrForm() {
   form.addEventListener('submit', async event => {
     event.preventDefault();
     status.classList.remove('error');
-    status.textContent = 'Generating payment QR...';
-    setSubmitState(form, true);
-
     const payload = Object.fromEntries(new FormData(form).entries());
 
-    try {
-      const qrResponse = await fetch(`${API_BASE}/api/payments/upi-qr`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!qrResponse.ok) {
-        const errorPayload = await qrResponse.json().catch(() => ({}));
-        throw new Error(errorPayload.error || errorPayload.errors?.join(', ') || 'Could not generate QR');
-      }
-
-      const qrPayment = await qrResponse.json();
-
-      showPaymentQr(qrPayment);
-      status.textContent = 'QR ready. Scan it with Google Pay and submit the payment reference after paying.';
-    } catch (error) {
+    if (!payload.name || String(payload.name).trim().length < 2) {
       status.classList.add('error');
-      status.textContent = `QR could not be generated: ${error.message}.`;
-    } finally {
-      setSubmitState(form, false);
+      status.textContent = 'Enter the payer name before opening the QR.';
+      return;
     }
+
+    if (!payload.phone || String(payload.phone).replace(/\D/g, '').length < 10) {
+      status.classList.add('error');
+      status.textContent = 'Enter a valid phone number before opening the QR.';
+      return;
+    }
+
+    if (!payload.amount || Number(payload.amount) <= 0) {
+      status.classList.add('error');
+      status.textContent = 'Enter a valid amount before opening the QR.';
+      return;
+    }
+
+    showPaymentQrPopup(payload);
+    status.textContent = 'QR opened. Scan it and tap payment completed after paying.';
   });
 }
 
-function showPaymentQr(qrPayment) {
-  const result = document.getElementById('paymentQrResult');
-  const image = document.getElementById('paymentQrImage');
-  const amount = document.getElementById('paymentQrAmount');
-  const link = document.getElementById('googlePayLink');
-  const upiId = document.getElementById('upiId');
-  const qrUpiId = document.getElementById('paymentQrUpiId');
-  const payeeName = document.getElementById('upiPayeeName');
+function showPaymentQrPopup(payload) {
+  const popup = document.getElementById('paymentQrPopup');
+  const amount = document.getElementById('popupPaymentAmount');
 
-  if (!result || !image || !amount || !link) return;
+  if (!popup || !amount) return;
 
-  image.src = qrPayment.qrImageUrl;
-  amount.textContent = `Rs.${qrPayment.amount}`;
-  link.href = qrPayment.paymentUri;
+  amount.textContent = `Rs.${Number(payload.amount).toFixed(2)}`;
+  popup.classList.add('is-visible');
+  popup.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
 
-  if (upiId) upiId.textContent = qrPayment.upiId;
-  if (qrUpiId) qrUpiId.textContent = qrPayment.upiId;
-  if (payeeName) payeeName.textContent = qrPayment.payeeName;
+function closePaymentQrPopup() {
+  const popup = document.getElementById('paymentQrPopup');
+  if (!popup) return;
 
-  result.hidden = false;
+  popup.classList.remove('is-visible');
+  popup.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+}
+
+function markPaymentCompleted() {
+  const qrForm = document.getElementById('googlePayQrForm');
+  const paymentForm = document.getElementById('paymentForm');
+  const status = document.getElementById('googlePayQrStatus');
+
+  if (qrForm && paymentForm) {
+    const payload = Object.fromEntries(new FormData(qrForm).entries());
+    ['name', 'phone', 'amount', 'purpose'].forEach(field => {
+      const input = paymentForm.querySelector(`[name="${field}"]`);
+      if (input && payload[field]) input.value = payload[field];
+    });
+  }
+
+  closePaymentQrPopup();
+  if (status) status.textContent = 'Payment marked completed. Submit the UPI reference ID below.';
+  paymentForm?.querySelector('[name="reference"]')?.focus();
+}
+
+function setupPaymentQrPopup() {
+  const popup = document.getElementById('paymentQrPopup');
+  if (!popup) return;
+
+  popup.addEventListener('click', event => {
+    if (event.target === popup) {
+      closePaymentQrPopup();
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && popup.classList.contains('is-visible')) {
+      closePaymentQrPopup();
+    }
+  });
 }
 
 function setSubmitState(form, isSubmitting) {
