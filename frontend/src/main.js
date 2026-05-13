@@ -27,13 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function shouldReturnToLanding() {
+  const navigationEntry = performance.getEntriesByType('navigation')[0];
+  const isReload = navigationEntry?.type === 'reload' || performance.navigation?.type === 1;
+
+  if (isReload) {
+    sessionStorage.removeItem(LANDING_ENTRY_KEY);
+    return true;
+  }
+
   if (window.location.hash) {
     sessionStorage.removeItem(LANDING_ENTRY_KEY);
     return false;
   }
 
-  const navigationEntry = performance.getEntriesByType('navigation')[0];
-  const isReload = navigationEntry?.type === 'reload' || performance.navigation?.type === 1;
   const hasLandingPass = sessionStorage.getItem(LANDING_ENTRY_KEY) === 'true';
   const cameFromLanding = (() => {
     if (!document.referrer) return false;
@@ -49,7 +55,7 @@ function shouldReturnToLanding() {
 
   sessionStorage.removeItem(LANDING_ENTRY_KEY);
 
-  return !isReload && !hasLandingPass && !cameFromLanding;
+  return !hasLandingPass && !cameFromLanding;
 }
 
 function setupScrollState() {
