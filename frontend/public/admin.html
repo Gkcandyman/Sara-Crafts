@@ -2,85 +2,161 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sara Crafts Admin Panel</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../src/styles/admin.css" />
 </head>
-<body class="bg-rose-50 text-gray-800 font-sans">
-  <main class="admin-shell">
-    <header class="admin-header">
-      <div>
-        <p class="eyebrow">Sara Crafts Admin</p>
-        <h1>Business Requests</h1>
+<body>
+  <main class="admin-layout">
+    <aside class="admin-sidebar" aria-label="Admin sections">
+      <a href="land.html" class="admin-brand">
+        <img src="assets/images/logo.png" alt="Sara Crafts Logo" />
+        <span>Sara Crafts</span>
+      </a>
+
+      <nav class="sidebar-nav">
+        <button type="button" class="sidebar-link is-active" data-section="dashboard">Dashboard</button>
+        <button type="button" class="sidebar-link" data-section="orders">Orders</button>
+        <button type="button" class="sidebar-link" data-section="appointments">Appointments</button>
+        <button type="button" class="sidebar-link" data-section="enquiries">Enquiries</button>
+        <button type="button" class="sidebar-link" data-section="payments">Payments</button>
+        <button type="button" class="sidebar-link" data-section="services">Service Summary</button>
+        <button type="button" class="sidebar-link" data-section="settings">Settings</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="main.html" class="admin-link">Open Website</a>
+        <button type="button" onclick="logoutAdmin()" class="logout-button">Logout</button>
       </div>
-      <div class="admin-actions">
-        <a href="land.html" class="admin-link">Website</a>
-        <button onclick="toggleTheme()" id="themeToggle">Moon</button>
-        <button onclick="togglePasswordChange()">Change Password</button>
-      </div>
-    </header>
+    </aside>
 
-    <section class="metric-grid">
-      <article><span>Total Orders</span><strong id="orderCount">0</strong></article>
-      <article><span>Appointments</span><strong id="appointmentCount">0</strong></article>
-      <article><span>Enquiries</span><strong id="enquiryCount">0</strong></article>
-      <article><span>Payments</span><strong>Rs.<span id="totalProfit">0</span></strong></article>
+    <section class="admin-main">
+      <header class="admin-header">
+        <div>
+          <p class="eyebrow">Sara Crafts Admin</p>
+          <h1 id="sectionTitle">Dashboard</h1>
+          <p id="sectionSubtitle">Live request tracking for orders, appointments, enquiries and payments.</p>
+        </div>
+        <div class="admin-actions">
+          <button type="button" onclick="refreshDashboard()">Refresh</button>
+          <button type="button" onclick="toggleTheme()" id="themeToggle">Moon</button>
+        </div>
+      </header>
+
+      <p class="admin-status" id="adminStatus" role="status"></p>
+
+      <section class="admin-section is-active" id="dashboardSection" data-title="Dashboard" data-subtitle="Live request tracking for orders, appointments, enquiries and payments.">
+        <div class="metric-grid">
+          <article><span>Total Orders</span><strong id="orderCount">0</strong></article>
+          <article><span>Appointments</span><strong id="appointmentCount">0</strong></article>
+          <article><span>Enquiries</span><strong id="enquiryCount">0</strong></article>
+          <article><span>Total Payments</span><strong>Rs.<span id="totalProfit">0.00</span></strong></article>
+        </div>
+
+        <div class="admin-grid">
+          <article class="admin-card">
+            <div class="card-heading">
+              <h2>Recent Requests</h2>
+              <span id="recentCount">0 items</span>
+            </div>
+            <div id="recentList" class="record-list compact-list"></div>
+          </article>
+          <article class="admin-card">
+            <div class="card-heading">
+              <h2>Status Overview</h2>
+              <span>All sections</span>
+            </div>
+            <div id="statusOverview" class="bar-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-section" id="ordersSection" data-title="Orders" data-subtitle="View, update and remove custom order requests.">
+        <article class="admin-card">
+          <div class="card-heading">
+            <h2>Orders</h2>
+            <span id="ordersTotal">0 records</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Name</th>
+                  <th>Service</th>
+                  <th>Budget</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orderTable"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="admin-section" id="appointmentsSection" data-title="Appointments" data-subtitle="Manage service bookings and preferred slots.">
+        <article class="admin-card">
+          <div class="card-heading">
+            <h2>Appointments</h2>
+            <span id="appointmentsTotal">0 records</span>
+          </div>
+          <div id="appointmentList" class="record-list"></div>
+        </article>
+      </section>
+
+      <section class="admin-section" id="enquiriesSection" data-title="Enquiries" data-subtitle="Track customer questions and follow-up status.">
+        <article class="admin-card">
+          <div class="card-heading">
+            <h2>Enquiries</h2>
+            <span id="enquiriesTotal">0 records</span>
+          </div>
+          <div id="enquiryList" class="record-list"></div>
+        </article>
+      </section>
+
+      <section class="admin-section" id="paymentsSection" data-title="Payments" data-subtitle="Verify payment proofs and track received amounts.">
+        <article class="admin-card">
+          <div class="card-heading">
+            <h2>Payments</h2>
+            <span id="paymentsTotal">0 records</span>
+          </div>
+          <div id="paymentList" class="record-list"></div>
+        </article>
+      </section>
+
+      <section class="admin-section" id="servicesSection" data-title="Service Summary" data-subtitle="Service-wise order, appointment and amount split.">
+        <article class="admin-card">
+          <div class="card-heading">
+            <h2>Service Wise Data</h2>
+            <span id="serviceTotal">0 services</span>
+          </div>
+          <div id="serviceSummary" class="service-summary"></div>
+        </article>
+      </section>
+
+      <section class="admin-section" id="settingsSection" data-title="Settings" data-subtitle="Admin preferences for this browser.">
+        <article class="admin-card settings-card">
+          <h2>Admin Password</h2>
+          <p>Updates the local admin password used by this browser login screen.</p>
+          <label>New admin password
+            <input type="password" id="newPassword" placeholder="Enter new password" />
+          </label>
+          <button type="button" onclick="saveNewPassword()">Save New Password</button>
+        </article>
+      </section>
     </section>
-
-    <section id="passwordChange" class="admin-card hidden">
-      <label>New admin password
-        <input type="password" id="newPassword" placeholder="Enter new password">
-      </label>
-      <button onclick="saveNewPassword()">Save New Password</button>
-    </section>
-
-    <section class="admin-card">
-      <div class="table-heading">
-        <h2>Orders</h2>
-        <span id="ordersStatus"></span>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Service</th>
-              <th>Budget</th>
-              <th>Details</th>
-            </tr>
-          </thead>
-          <tbody id="orderTable"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="admin-grid">
-      <article class="admin-card">
-        <h2>Appointments</h2>
-        <div id="appointmentList" class="record-list"></div>
-      </article>
-
-      <article class="admin-card">
-        <h2>Enquiries</h2>
-        <div id="enquiryList" class="record-list"></div>
-      </article>
-    </section>
-
-    <section class="admin-card">
-      <h2>Payments</h2>
-      <div id="paymentList" class="record-list"></div>
-    </section>
-
-    <div class="logout-row">
-      <button onclick="logoutAdmin()" class="logout-button relative overflow-hidden">
-        Logout
-        <span class="magic-ring"></span>
-      </button>
-    </div>
   </main>
+
+  <div id="recordModal" class="record-modal" aria-hidden="true">
+    <div class="record-dialog" role="dialog" aria-modal="true" aria-labelledby="recordModalTitle">
+      <button type="button" class="modal-close" aria-label="Close record details" onclick="closeRecordModal()">x</button>
+      <p class="eyebrow" id="recordModalType">Record</p>
+      <h2 id="recordModalTitle">Request Details</h2>
+      <dl id="recordDetails" class="detail-list"></dl>
+    </div>
+  </div>
 
   <script src="../src/pages/admin.js"></script>
 </body>

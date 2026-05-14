@@ -126,6 +126,12 @@ async function app(req, res) {
     return;
   }
 
+  const collectionItem = matchCollectionItem(url.pathname);
+  if (collectionItem) {
+    await handleCollectionItem(req, res, collectionItem.route, collectionItem.requestId);
+    return;
+  }
+
   if (collectionRoutes[url.pathname]) {
     await handleCollection(req, res, url.pathname);
     return;
@@ -208,6 +214,40 @@ async function handleCollection(req, res, pathname) {
   sendJson(res, 201, { message: 'Saved successfully', record, notification });
 }
 
+async function handleCollectionItem(req, res, route, requestId) {
+  if (req.method === 'PATCH') {
+    const payload = sanitizePayload(JSON.parse((await readBody(req)) || '{}'));
+    const errors = validateStatusPayload(route, payload);
+
+    if (errors.length) {
+      sendJson(res, 400, { errors });
+      return;
+    }
+
+    const record = await updateRecordStatus(route, requestId, payload.status);
+    if (!record) {
+      sendJson(res, 404, { error: 'Record not found' });
+      return;
+    }
+
+    sendJson(res, 200, { message: 'Updated successfully', record });
+    return;
+  }
+
+  if (req.method === 'DELETE') {
+    const deleted = await deleteRecord(route, requestId);
+    if (!deleted) {
+      sendJson(res, 404, { error: 'Record not found' });
+      return;
+    }
+
+    sendJson(res, 200, { message: 'Deleted successfully', requestId });
+    return;
+  }
+
+  sendJson(res, 405, { error: 'Method not allowed' });
+}
+
 async function saveRecord(route, payload) {
   if (isJsonStorage()) {
     const record = {
@@ -258,6 +298,86 @@ async function readRecords(route) {
     console.warn(`MySQL read failed for ${route.table}; using JSON fallback: ${error.message}`);
     return readJson(route.file);
   }
+}
+
+async function updateRecordStatus(route, requestId, status) {
+  if (isJsonStorage()) {
+    return updateJsonRecordStatus(route, requestId, status);
+  }
+
+  let mysqlRecord = null;
+
+  try {
+    const db = await getPool();
+    const [result] = await db.query(
+      `UPDATE ${route.table} SET status = ? WHERE request_id = ?`,
+      [status, requestId],
+    );
+
+    if (result.affectedRows > 0) {
+      const [rows] = await db.query(
+        `SELECT ${route.select} FROM ${route.table} WHERE request_id = ? LIMIT 1`,
+        [requestId],
+      );
+      mysqlRecord = rows[0] || { requestId, status, storage: 'mysql' };
+    }
+  } catch (error) {
+    console.warn(`MySQL update failed for ${route.table}; trying JSON fallback: ${error.message}`);
+  }
+
+  const jsonRecord = updateJsonRecordStatus(route, requestId, status);
+  return mysqlRecord || jsonRecord;
+}
+
+function updateJsonRecordStatus(route, requestId, status) {
+  const records = readJson(route.file);
+  const index = records.findIndex(record => record.requestId === requestId);
+
+  if (index === -1) {
+    return null;
+  }
+
+  records[index] = {
+    ...records[index],
+    status,
+    updatedAt: new Date().toISOString(),
+  };
+  writeJson(route.file, records);
+  return records[index];
+}
+
+async function deleteRecord(route, requestId) {
+  if (isJsonStorage()) {
+    return deleteJsonRecord(route, requestId);
+  }
+
+  let mysqlDeleted = false;
+
+  try {
+    const db = await getPool();
+    const [result] = await db.query(
+      `DELETE FROM ${route.table} WHERE request_id = ?`,
+      [requestId],
+    );
+    mysqlDeleted = result.affectedRows > 0;
+  } catch (error) {
+    console.warn(`MySQL delete failed for ${route.table}; trying JSON fallback: ${error.message}`);
+  }
+
+  const jsonDeleted = deleteJsonRecord(route, requestId);
+  return mysqlDeleted || jsonDeleted;
+}
+
+function deleteJsonRecord(route, requestId) {
+  const records = readJson(route.file);
+  const nextRecords = records.filter(record => record.requestId !== requestId);
+
+  if (nextRecords.length === records.length) {
+    return false;
+  }
+
+  writeJson(route.file, nextRecords);
+  return true;
 }
 
 function mergeRecords(primaryRecords, fallbackRecords) {
@@ -385,6 +505,25 @@ function validatePayload(pathname, payload) {
   return errors;
 }
 
+function validateStatusPayload(route, payload) {
+  const errors = [];
+  const allowed = getAllowedStatuses(route);
+
+  if (!payload.status || !allowed.includes(payload.status)) {
+    errors.push(`Status must be one of: ${allowed.join(', ')}`);
+  }
+
+  return errors;
+}
+
+function getAllowedStatuses(route) {
+  if (route.table === 'payments') {
+    return ['pending_verification', 'verified', 'rejected'];
+  }
+
+  return ['new', 'in_progress', 'completed', 'cancelled'];
+}
+
 function validateUpiPayment(payload) {
   const errors = [];
 
@@ -438,6 +577,20 @@ function buildRecord(payload) {
     requestId: createId(),
     ...payload,
   };
+}
+
+function matchCollectionItem(pathname) {
+  for (const [basePath, route] of Object.entries(collectionRoutes)) {
+    const prefix = `${basePath}/`;
+    if (pathname.startsWith(prefix)) {
+      const requestId = decodeURIComponent(pathname.slice(prefix.length));
+      if (requestId) {
+        return { route, requestId };
+      }
+    }
+  }
+
+  return null;
 }
 
 function readBody(req) {
@@ -503,7 +656,7 @@ function getContentType(filePath) {
 
 function setCorsHeaders(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
