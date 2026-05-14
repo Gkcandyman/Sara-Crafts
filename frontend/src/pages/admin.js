@@ -2,6 +2,7 @@ const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:5000' 
 
 const state = {
   activeSection: 'dashboard',
+  statusTimer: null,
   collections: {
     orders: [],
     appointments: [],
@@ -116,7 +117,7 @@ async function loadDashboard() {
   }
 }
 
-async function reloadAdminData(message = 'Admin data refreshed.') {
+async function reloadAdminData(message = '') {
   const [orders, appointments, enquiries, payments] = await Promise.all([
     fetchCollection('orders'),
     fetchCollection('appointments'),
@@ -564,7 +565,7 @@ async function updateRecordStatus(collection, requestId, status, select) {
     }
 
     await response.json();
-    await reloadAdminData('Status updated from server.');
+    await reloadAdminData('Status updated.');
   } catch (error) {
     select.value = previous;
     setAdminStatus(`Could not update status: ${error.message}`);
@@ -593,7 +594,7 @@ async function deleteAdminRecord(collection, requestId) {
       throw new Error(errorPayload.error || 'Delete failed');
     }
 
-    await reloadAdminData('Record deleted from server.');
+    await reloadAdminData('');
   } catch (error) {
     setAdminStatus(`Could not delete record: ${error.message}`);
   }
@@ -799,8 +800,19 @@ function formatDetailValue(key, value) {
   return String(value);
 }
 
-function setAdminStatus(message) {
+function setAdminStatus(message, options = {}) {
+  window.clearTimeout(state.statusTimer);
   setText('adminStatus', message);
+
+  if (!message) {
+    return;
+  }
+
+  const isError = message.toLowerCase().includes('could not');
+  const timeout = options.timeout ?? (isError ? 9000 : 2200);
+  state.statusTimer = window.setTimeout(() => {
+    setText('adminStatus', '');
+  }, timeout);
 }
 
 function setText(id, value) {
