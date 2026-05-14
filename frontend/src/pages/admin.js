@@ -122,6 +122,7 @@ function renderAdmin() {
   renderMetrics();
   renderRecentList();
   renderStatusOverview();
+  renderDashboardCharts();
   renderOrders();
   renderRecordList('appointmentList', 'appointments');
   renderRecordList('enquiryList', 'enquiries');
@@ -209,6 +210,118 @@ function renderStatusOverview() {
       <div class="bar-track"><span style="width: ${(count / max) * 100}%"></span></div>
     </div>
   `).join('');
+}
+
+function renderDashboardCharts() {
+  renderOrderWiseChart();
+  renderAmountPercentageChart();
+  renderServiceActivityChart();
+}
+
+function renderOrderWiseChart() {
+  const container = document.getElementById('orderWiseChart');
+  if (!container) return;
+
+  const orders = state.collections.orders;
+  const counts = groupByCount(orders, order => order.service || 'Unassigned');
+  const entries = sortEntriesByValue(counts);
+  const total = orders.length;
+  const max = Math.max(...entries.map(([, count]) => count), 1);
+
+  setText('orderChartTotal', `${total} orders`);
+
+  if (!entries.length) {
+    container.innerHTML = '<p class="empty-state">No order data yet.</p>';
+    return;
+  }
+
+  container.innerHTML = entries.map(([service, count]) => renderChartRow({
+    label: service,
+    value: count,
+    meta: `${getPercentage(count, total)}% of orders`,
+    width: (count / max) * 100,
+  })).join('');
+}
+
+function renderAmountPercentageChart() {
+  const container = document.getElementById('amountPercentageChart');
+  if (!container) return;
+
+  const payments = state.collections.payments;
+  const total = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const amounts = payments.reduce((summary, payment) => {
+    const status = payment.status || defaultStatus('payments');
+    summary[status] = (summary[status] || 0) + Number(payment.amount || 0);
+    return summary;
+  }, {});
+  const entries = sortEntriesByValue(amounts);
+  const max = Math.max(...entries.map(([, amount]) => amount), 1);
+
+  setText('amountChartTotal', `Rs.${total.toFixed(2)}`);
+
+  if (!entries.length) {
+    container.innerHTML = '<p class="empty-state">No payment amount data yet.</p>';
+    return;
+  }
+
+  container.innerHTML = entries.map(([status, amount]) => renderChartRow({
+    label: formatStatus(status),
+    value: `Rs.${amount.toFixed(2)}`,
+    meta: `${getPercentage(amount, total)}% of amount`,
+    width: (amount / max) * 100,
+  })).join('');
+}
+
+function renderServiceActivityChart() {
+  const container = document.getElementById('serviceActivityChart');
+  if (!container) return;
+
+  const summary = Object.values(buildServiceSummary())
+    .sort((a, b) => (b.orders + b.appointments) - (a.orders + a.appointments));
+  const max = Math.max(...summary.map(item => item.orders + item.appointments), 1);
+
+  setText('serviceActivityTotal', `${summary.length} services`);
+
+  if (!summary.length) {
+    container.innerHTML = '<p class="empty-state">No service activity yet.</p>';
+    return;
+  }
+
+  container.innerHTML = summary.map(item => {
+    const total = item.orders + item.appointments;
+    const orderWidth = total ? (item.orders / max) * 100 : 0;
+    const appointmentWidth = total ? (item.appointments / max) * 100 : 0;
+
+    return `
+      <article class="stacked-row">
+        <div class="stacked-label">
+          <strong>${escapeHtml(item.service)}</strong>
+          <span>${total} total</span>
+        </div>
+        <div class="stacked-track" aria-label="${escapeHtml(item.service)} activity">
+          <span class="stack-orders" style="width: ${orderWidth}%"></span>
+          <span class="stack-appointments" style="width: ${appointmentWidth}%"></span>
+        </div>
+        <div class="stacked-meta">
+          <span>${item.orders} orders</span>
+          <span>${item.appointments} appointments</span>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function renderChartRow({ label, value, meta, width }) {
+  return `
+    <div class="chart-row">
+      <div class="chart-row-top">
+        <strong>${escapeHtml(label)}</strong>
+        <span>${escapeHtml(value)}</span>
+      </div>
+      <div class="bar-track"><span style="width: ${width}%"></span></div>
+      <small>${escapeHtml(meta)}</small>
+    </div>
+  `;
 }
 
 function renderOrders() {
@@ -362,6 +475,23 @@ function buildKnownServices() {
     }
     return services;
   }, {});
+}
+
+function groupByCount(records, keyFactory) {
+  return records.reduce((summary, record) => {
+    const key = keyFactory(record);
+    summary[key] = (summary[key] || 0) + 1;
+    return summary;
+  }, {});
+}
+
+function sortEntriesByValue(summary) {
+  return Object.entries(summary).sort(([, a], [, b]) => b - a);
+}
+
+function getPercentage(value, total) {
+  if (!total) return 0;
+  return Math.round((Number(value || 0) / Number(total || 0)) * 100);
 }
 
 function updateTotals() {
