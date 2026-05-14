@@ -81,10 +81,12 @@ select:disabled {
 }
 
 .admin-brand img {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: white;
+  padding: 4px;
 }
 
 .sidebar-nav {
