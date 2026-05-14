@@ -46,6 +46,9 @@ CREATE TABLE IF NOT EXISTS payments (
   amount DECIMAL(10, 2) NOT NULL,
   reference_id VARCHAR(160) NOT NULL,
   purpose VARCHAR(255),
+  screenshot_name VARCHAR(255),
+  screenshot_type VARCHAR(120),
+  screenshot_data LONGTEXT,
   status VARCHAR(40) DEFAULT 'pending_verification',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

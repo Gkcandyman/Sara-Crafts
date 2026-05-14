@@ -33,6 +33,13 @@ const collectionConfig = {
   },
 };
 
+const hiddenDetailFields = new Set([
+  'storage',
+  'source',
+  'screenshotData',
+  'screenshotType',
+]);
+
 document.addEventListener('DOMContentLoaded', () => {
   const loggedIn = localStorage.getItem('adminLoggedIn');
   if (!loggedIn) {
@@ -57,6 +64,9 @@ function bindAdminEvents() {
     const { action, collection, id } = actionButton.dataset;
     if (action === 'view') {
       openRecordModal(collection, id);
+    }
+    if (action === 'view-service') {
+      openServiceModal(id);
     }
     if (action === 'delete') {
       deleteAdminRecord(collection, id);
@@ -104,6 +114,19 @@ async function loadDashboard() {
     setAdminStatus(`Could not load saved requests: ${error.message}`);
     renderAdmin();
   }
+}
+
+async function reloadAdminData(message = 'Admin data refreshed.') {
+  const [orders, appointments, enquiries, payments] = await Promise.all([
+    fetchCollection('orders'),
+    fetchCollection('appointments'),
+    fetchCollection('enquiries'),
+    fetchCollection('payments'),
+  ]);
+
+  state.collections = { orders, appointments, enquiries, payments };
+  renderAdmin();
+  setAdminStatus(message);
 }
 
 function refreshDashboard() {
@@ -202,12 +225,13 @@ function renderStatusOverview() {
   }
 
   container.innerHTML = entries.map(([status, count]) => `
-    <div class="bar-row">
-      <div class="bar-label">
-        <span>${formatStatus(status)}</span>
-        <strong>${count}</strong>
+    <div class="status-orbit-card">
+      <span class="status-dot ${statusClass(status)}"></span>
+      <div>
+        <strong>${formatStatus(status)}</strong>
+        <span>${count} live records</span>
       </div>
-      <div class="bar-track"><span style="width: ${(count / max) * 100}%"></span></div>
+      <i style="--value: ${(count / max) * 100}%">${count}</i>
     </div>
   `).join('');
 }
@@ -226,7 +250,6 @@ function renderOrderWiseChart() {
   const counts = groupByCount(orders, order => order.service || 'Unassigned');
   const entries = sortEntriesByValue(counts);
   const total = orders.length;
-  const max = Math.max(...entries.map(([, count]) => count), 1);
 
   setText('orderChartTotal', `${total} orders`);
 
@@ -235,12 +258,20 @@ function renderOrderWiseChart() {
     return;
   }
 
-  container.innerHTML = entries.map(([service, count]) => renderChartRow({
-    label: service,
-    value: count,
-    meta: `${getPercentage(count, total)}% of orders`,
-    width: (count / max) * 100,
-  })).join('');
+  container.innerHTML = entries.map(([service, count]) => {
+    const percentage = getPercentage(count, total);
+    return `
+      <article class="ring-card">
+        <div class="ring-meter" style="--value: ${percentage}%">
+          <strong>${percentage}%</strong>
+        </div>
+        <div>
+          <strong>${escapeHtml(service)}</strong>
+          <span>${count} orders</span>
+        </div>
+      </article>
+    `;
+  }).join('');
 }
 
 function renderAmountPercentageChart() {
@@ -255,7 +286,6 @@ function renderAmountPercentageChart() {
     return summary;
   }, {});
   const entries = sortEntriesByValue(amounts);
-  const max = Math.max(...entries.map(([, amount]) => amount), 1);
 
   setText('amountChartTotal', `Rs.${total.toFixed(2)}`);
 
@@ -264,12 +294,20 @@ function renderAmountPercentageChart() {
     return;
   }
 
-  container.innerHTML = entries.map(([status, amount]) => renderChartRow({
-    label: formatStatus(status),
-    value: `Rs.${amount.toFixed(2)}`,
-    meta: `${getPercentage(amount, total)}% of amount`,
-    width: (amount / max) * 100,
-  })).join('');
+  container.innerHTML = entries.map(([status, amount]) => {
+    const percentage = getPercentage(amount, total);
+    return `
+      <article class="payment-orbit-card">
+        <div class="payment-orbit" style="--value: ${percentage}%">
+          <strong>${percentage}%</strong>
+        </div>
+        <div>
+          <strong>${formatStatus(status)}</strong>
+          <span>Rs.${amount.toFixed(2)}</span>
+        </div>
+      </article>
+    `;
+  }).join('');
 }
 
 function renderServiceActivityChart() {
@@ -289,18 +327,22 @@ function renderServiceActivityChart() {
 
   container.innerHTML = summary.map(item => {
     const total = item.orders + item.appointments;
-    const orderWidth = total ? (item.orders / max) * 100 : 0;
-    const appointmentWidth = total ? (item.appointments / max) * 100 : 0;
+    const activityWidth = total ? (total / max) * 100 : 0;
+    const orderShare = total ? (item.orders / total) * 100 : 0;
+    const appointmentShare = total ? (item.appointments / total) * 100 : 0;
 
     return `
-      <article class="stacked-row">
+      <article class="service-art-card">
         <div class="stacked-label">
           <strong>${escapeHtml(item.service)}</strong>
           <span>${total} total</span>
         </div>
-        <div class="stacked-track" aria-label="${escapeHtml(item.service)} activity">
-          <span class="stack-orders" style="width: ${orderWidth}%"></span>
-          <span class="stack-appointments" style="width: ${appointmentWidth}%"></span>
+        <div class="service-art-track" aria-label="${escapeHtml(item.service)} activity">
+          <span style="width: ${activityWidth}%"></span>
+        </div>
+        <div class="stacked-track" aria-label="${escapeHtml(item.service)} split">
+          <span class="stack-orders" style="width: ${orderShare}%"></span>
+          <span class="stack-appointments" style="width: ${appointmentShare}%"></span>
         </div>
         <div class="stacked-meta">
           <span>${item.orders} orders</span>
@@ -427,6 +469,9 @@ function renderServiceSummary() {
         <span>${item.appointments} appointments</span>
       </div>
       <div class="bar-track"><span style="width: ${((item.orders + item.appointments) / maxActivity) * 100}%"></span></div>
+      <div class="action-group">
+        <button type="button" class="ghost-button" data-action="view-service" data-id="${escapeHtml(item.service)}">View Service Data</button>
+      </div>
     </article>
   `).join('');
 }
@@ -518,14 +563,8 @@ async function updateRecordStatus(collection, requestId, status, select) {
       throw new Error(errorPayload.error || errorPayload.errors?.join(', ') || 'Status update failed');
     }
 
-    const payload = await response.json();
-    const record = findRecord(collection, requestId);
-    if (record) {
-      Object.assign(record, payload.record || {}, { status });
-    }
-
-    renderAdmin();
-    setAdminStatus('Status updated.');
+    await response.json();
+    await reloadAdminData('Status updated from server.');
   } catch (error) {
     select.value = previous;
     setAdminStatus(`Could not update status: ${error.message}`);
@@ -554,9 +593,7 @@ async function deleteAdminRecord(collection, requestId) {
       throw new Error(errorPayload.error || 'Delete failed');
     }
 
-    state.collections[collection] = state.collections[collection].filter(item => item.requestId !== requestId);
-    renderAdmin();
-    setAdminStatus('Record deleted.');
+    await reloadAdminData('Record deleted from server.');
   } catch (error) {
     setAdminStatus(`Could not delete record: ${error.message}`);
   }
@@ -568,15 +605,44 @@ function openRecordModal(collection, requestId) {
 
   const modal = document.getElementById('recordModal');
   const details = document.getElementById('recordDetails');
+  const proof = document.getElementById('paymentProofPreview');
   document.getElementById('recordModalType').textContent = collectionConfig[collection].label;
   document.getElementById('recordModalTitle').textContent = getRecordTitle(collection, record);
 
-  details.innerHTML = Object.entries(record)
-    .filter(([, value]) => value !== undefined && value !== null && value !== '')
+  details.innerHTML = getVisibleDetailEntries(record)
     .map(([key, value]) => `
       <dt>${formatKey(key)}</dt>
       <dd>${escapeHtml(formatDetailValue(key, value))}</dd>
     `).join('');
+  proof.innerHTML = collection === 'payments' ? renderPaymentProof(record) : '';
+
+  modal.classList.add('is-visible');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function openServiceModal(serviceName) {
+  const service = serviceName;
+  const orders = state.collections.orders.filter(record => (record.service || 'Unassigned') === service);
+  const appointments = state.collections.appointments.filter(record => (record.service || 'Unassigned') === service);
+  const payments = state.collections.payments.filter(payment => inferPaymentService(payment) === service);
+  const amount = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const modal = document.getElementById('recordModal');
+  const details = document.getElementById('recordDetails');
+  const proof = document.getElementById('paymentProofPreview');
+
+  document.getElementById('recordModalType').textContent = 'Service';
+  document.getElementById('recordModalTitle').textContent = service;
+  details.innerHTML = [
+    ['orders', orders.length],
+    ['appointments', appointments.length],
+    ['linkedPayments', payments.length],
+    ['linkedPaymentAmount', amount],
+    ['latestActivity', getLatestServiceActivity([...orders, ...appointments, ...payments])],
+  ].map(([key, value]) => `
+    <dt>${formatKey(key)}</dt>
+    <dd>${escapeHtml(formatDetailValue(key, value))}</dd>
+  `).join('');
+  proof.innerHTML = renderServiceRecords(orders, appointments, payments);
 
   modal.classList.add('is-visible');
   modal.setAttribute('aria-hidden', 'false');
@@ -588,6 +654,72 @@ function closeRecordModal() {
 
   modal.classList.remove('is-visible');
   modal.setAttribute('aria-hidden', 'true');
+}
+
+function getVisibleDetailEntries(record) {
+  return Object.entries(record).filter(([key, value]) => (
+    !hiddenDetailFields.has(key)
+    && value !== undefined
+    && value !== null
+    && value !== ''
+  ));
+}
+
+function renderPaymentProof(record) {
+  const screenshotData = String(record.screenshotData || '');
+  if (screenshotData.length > 2000 && screenshotData.startsWith('data:image/')) {
+    return `
+      <section class="proof-panel">
+        <div>
+          <p class="eyebrow">Payment Proof</p>
+          <h3>${escapeHtml(record.screenshotName || 'Uploaded Screenshot')}</h3>
+        </div>
+        <img src="${escapeHtml(record.screenshotData)}" alt="Payment proof screenshot" />
+      </section>
+    `;
+  }
+
+  return `
+    <section class="proof-panel proof-panel-empty">
+      <p class="eyebrow">Payment Proof</p>
+      <h3>No screenshot preview available</h3>
+      <p>${escapeHtml(record.screenshotName || record.reference || 'The payment proof image was not saved with this record.')}</p>
+    </section>
+  `;
+}
+
+function renderServiceRecords(orders, appointments, payments) {
+  const rows = [
+    ...orders.map(record => ['Order', record]),
+    ...appointments.map(record => ['Appointment', record]),
+    ...payments.map(record => ['Payment', record]),
+  ].sort((a, b) => new Date(b[1].createdAt || 0) - new Date(a[1].createdAt || 0));
+
+  if (!rows.length) {
+    return '<section class="proof-panel proof-panel-empty"><h3>No linked service records yet</h3></section>';
+  }
+
+  return `
+    <section class="linked-records">
+      <p class="eyebrow">Linked Records</p>
+      ${rows.map(([type, record]) => `
+        <article>
+          <strong>${escapeHtml(type)} - ${escapeHtml(record.name || record.requestId)}</strong>
+          <span>${escapeHtml(getRecordSubtitle(type.toLowerCase() === 'payment' ? 'payments' : `${type.toLowerCase()}s`, record))}</span>
+          <small>${formatDate(record.createdAt)} · ${formatStatus(record.status || 'new')}</small>
+        </article>
+      `).join('')}
+    </section>
+  `;
+}
+
+function getLatestServiceActivity(records) {
+  const latest = records
+    .map(record => record.createdAt)
+    .filter(Boolean)
+    .sort((a, b) => new Date(b) - new Date(a))[0];
+
+  return latest || '-';
 }
 
 function getAllRecords() {
@@ -658,8 +790,11 @@ function formatDetailValue(key, value) {
   if (key.toLowerCase().includes('date') || key === 'createdAt' || key === 'updatedAt') {
     return formatDate(value);
   }
-  if (key === 'amount') {
+  if (key.toLowerCase().includes('amount')) {
     return `Rs.${Number(value || 0).toFixed(2)}`;
+  }
+  if (key === 'status') {
+    return formatStatus(value);
   }
   return String(value);
 }

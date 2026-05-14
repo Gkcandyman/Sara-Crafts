@@ -95,6 +95,25 @@ async function migrate() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  await ensureColumn('payments', 'screenshot_name', 'VARCHAR(255)');
+  await ensureColumn('payments', 'screenshot_type', 'VARCHAR(120)');
+  await ensureColumn('payments', 'screenshot_data', 'LONGTEXT');
+}
+
+async function ensureColumn(tableName, columnName, definition) {
+  const [rows] = await pool.query(
+    `SELECT COUNT(*) AS count
+     FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = ?
+       AND TABLE_NAME = ?
+       AND COLUMN_NAME = ?`,
+    [databaseName, tableName, columnName],
+  );
+
+  if (!rows[0]?.count) {
+    await pool.query(`ALTER TABLE \`${tableName}\` ADD COLUMN \`${columnName}\` ${definition}`);
+  }
 }
 
 module.exports = {

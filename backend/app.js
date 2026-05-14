@@ -87,8 +87,8 @@ const collectionRoutes = {
       const record = buildRecord(payload);
       await db.query(
         `INSERT INTO payments
-          (request_id, name, phone, amount, reference_id, purpose, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          (request_id, name, phone, amount, reference_id, purpose, screenshot_name, screenshot_type, screenshot_data, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           record.requestId,
           record.name,
@@ -96,12 +96,15 @@ const collectionRoutes = {
           Number(record.amount || 0),
           record.reference || record.screenshotName || 'screenshot-proof',
           record.purpose || null,
+          record.screenshotName || null,
+          record.screenshotType || null,
+          record.screenshotData || null,
           'pending_verification',
         ],
       );
       return record;
     },
-    select: 'request_id AS requestId, name, phone, amount, reference_id AS reference, purpose, status, created_at AS createdAt',
+    select: 'request_id AS requestId, name, phone, amount, reference_id AS reference, purpose, screenshot_name AS screenshotName, screenshot_type AS screenshotType, screenshot_data AS screenshotData, status, created_at AS createdAt',
   },
 };
 
@@ -382,13 +385,25 @@ function deleteJsonRecord(route, requestId) {
 
 function mergeRecords(primaryRecords, fallbackRecords) {
   const seen = new Set();
-  return [...primaryRecords, ...fallbackRecords]
-    .filter(record => {
-      const key = record.requestId || record.id;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
+  const merged = [];
+
+  [...primaryRecords, ...fallbackRecords].forEach(record => {
+    const key = record.requestId || record.id;
+    if (seen.has(key)) {
+      const existing = merged.find(item => (item.requestId || item.id) === key);
+      Object.entries(record).forEach(([field, value]) => {
+        if ((existing[field] === undefined || existing[field] === null || existing[field] === '') && value) {
+          existing[field] = value;
+        }
+      });
+      return;
+    }
+
+    seen.add(key);
+    merged.push(record);
+  });
+
+  return merged
     .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 }
 
@@ -567,9 +582,22 @@ function sanitizePayload(payload) {
   return Object.fromEntries(
     Object.entries(payload).map(([key, value]) => [
       key,
-      typeof value === 'string' ? value.trim().slice(0, 1000) : value,
+      sanitizePayloadValue(key, value),
     ]),
   );
+}
+
+function sanitizePayloadValue(key, value) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  const trimmed = value.trim();
+  if (key === 'screenshotData') {
+    return trimmed.slice(0, 5_500_000);
+  }
+
+  return trimmed.slice(0, 1000);
 }
 
 function buildRecord(payload) {
