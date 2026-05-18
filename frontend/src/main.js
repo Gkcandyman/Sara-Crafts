@@ -1,6 +1,7 @@
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
 const LANDING_ENTRY_KEY = 'saraCraftsEnteredWebsite';
 const LOADER_MIN_DURATION = 1300;
+const PAYMENT_QR_IMAGE_SRC = 'assets/images/google-pay-qr.jpeg';
 const loaderStartedAt = Date.now();
 
 if (shouldReturnToLanding()) {
@@ -20,6 +21,7 @@ const adminPass = localStorage.getItem('adminPassword') || 'saracrafts123';
 document.addEventListener('DOMContentLoaded', () => {
   restoreTheme();
   setupScrollState();
+  setupPaymentQrImage();
   setupBusinessForms();
   setupGooglePayQrForm();
   setupPaymentQrPopup();
@@ -174,6 +176,31 @@ function readFileAsDataUrl(file) {
   });
 }
 
+function setupPaymentQrImage() {
+  const qrImage = document.getElementById('paymentQrImage');
+  if (!qrImage) return;
+
+  const updateImageState = () => {
+    qrImage.dataset.loaded = qrImage.naturalWidth > 0 ? 'true' : 'false';
+  };
+
+  qrImage.addEventListener('load', () => {
+    qrImage.dataset.loaded = 'true';
+  });
+  qrImage.addEventListener('error', () => {
+    qrImage.dataset.loaded = 'false';
+    qrImage.alt = 'Payment QR image is unavailable';
+  });
+
+  if (qrImage.getAttribute('src') !== PAYMENT_QR_IMAGE_SRC) {
+    qrImage.src = PAYMENT_QR_IMAGE_SRC;
+  }
+
+  if (qrImage.complete) {
+    updateImageState();
+  }
+}
+
 function setupGooglePayQrForm() {
   const form = document.getElementById('googlePayQrForm');
   const status = document.getElementById('googlePayQrStatus');
@@ -210,8 +237,18 @@ function setupGooglePayQrForm() {
 function showPaymentQrPopup(payload) {
   const popup = document.getElementById('paymentQrPopup');
   const amount = document.getElementById('popupPaymentAmount');
+  const status = document.getElementById('googlePayQrStatus');
+  const qrImage = document.getElementById('paymentQrImage');
 
   if (!popup || !amount) return;
+
+  if (qrImage && qrImage.dataset.loaded === 'false') {
+    if (status) {
+      status.classList.add('error');
+      status.textContent = 'Payment QR image is unavailable. Please use the UPI ID below.';
+    }
+    return;
+  }
 
   amount.textContent = `Rs.${Number(payload.amount).toFixed(2)}`;
   popup.classList.add('is-visible');

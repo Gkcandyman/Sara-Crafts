@@ -768,11 +768,11 @@ body.modal-open {
 
 .payment-qr-dialog img {
   width: min(100%, 300px);
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
+  max-height: min(52vh, 420px);
+  object-fit: contain;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: #eef2fb;
+  background: #ffffff;
 }
 
 .payment-qr-dialog p:not(.eyebrow) {
