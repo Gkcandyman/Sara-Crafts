@@ -260,8 +260,6 @@
     scroll-behavior: smooth;
   }
 </style>
-
-  </style>
 </head>
 <body>
 
@@ -280,7 +278,6 @@
   <a href="#app" class="nav-link">App</a>
   <!-- Inside your <nav> -->
 <button id="themeToggle" onclick="toggleTheme()" class="hover:underline text-rose-500">🌙</button>
-</nav>
 </nav>
 
 <section id="home" class="text-center py-12">
@@ -453,7 +450,7 @@
 <!-- Removed: Admin Login & Placeholder -->
 
 <!-- Back to Top -->
-<button id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">❤️</button>
+<button id="backToTop" onclick="scrollToTop()">❤️</button>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -461,23 +458,27 @@
 
 <script>
   // Init AOS (animations on scroll)
-  AOS.init();
+  if (window.AOS) {
+    AOS.init();
+  }
 
   // Init Swiper
-  new Swiper(".mySwiper", {
-    loop: true,
-    autoplay: { delay: 3000, disableOnInteraction: false },
-    effect: "coverflow",
-    centeredSlides: true,
-    slidesPerView: "auto",
-    coverflowEffect: {
-      rotate: 20,
-      stretch: 0,
-      depth: 150,
-      modifier: 1,
-      slideShadows: true,
-    },
-  });
+  if (window.Swiper) {
+    new Swiper(".mySwiper", {
+      loop: true,
+      autoplay: { delay: 3000, disableOnInteraction: false },
+      effect: "coverflow",
+      centeredSlides: true,
+      slidesPerView: "auto",
+      coverflowEffect: {
+        rotate: 20,
+        stretch: 0,
+        depth: 150,
+        modifier: 1,
+        slideShadows: true,
+      },
+    });
+  }
 
   // Back to Top Button
   window.onscroll = function () {
@@ -575,16 +576,14 @@
 
 <!-- WhatsApp Floating Button (Bottom Left) -->
 <a href="https://wa.me/919791315227?text=Hi%20Sara%20Crafts!%20I%20visited%20your%20website%20and%20want%20to%20know%20more." 
-   class="whatsapp-float" target="_blank" title="Chat on WhatsApp">
+   class="whatsapp-float" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp">
   <img src="https://img.icons8.com/color/48/000000/whatsapp--v1.png" alt="WhatsApp">
 </a>
 
 <!-- Instagram Floating Button (Bottom Center) -->
 <a href="https://instagram.com/saracrafts2020" 
-   class="insta-float" target="_blank" title="Follow us on Instagram">
+   class="insta-float" target="_blank" rel="noopener noreferrer" title="Follow us on Instagram">
   <img src="https://img.icons8.com/fluency/48/instagram-new.png" alt="Instagram">
 </a>
-
-<button id="backToTop" onclick="scrolltop()">❤</button>
 </body>
 </html>

@@ -251,6 +251,10 @@
     width: 100%;
   }
 
+  .logo-img {
+    width: 100px;
+  }
+
   .nav-link.active {
     font-weight: bold;
     color: #be123c;
@@ -260,13 +264,11 @@
     scroll-behavior: smooth;
   }
 </style>
-
-  </style>
 </head>
 <body>
 
 <header class="text-center py-6 bg-rose-100 shadow-md">
-  <img src="assets/images/logo.png" alt="Sara Crafts Logo" class="pulse" style="width:100px;" />
+  <img src="assets/images/logo.png" alt="Sara Crafts Logo" class="pulse logo-img" />
   <h1 class="text-4xl text-rose-600 art-font mt-2">Sara Crafts</h1>
   <p class="text-md text-gray-600 italic">Handmade with love & Memories ✨</p>
 </header>
@@ -279,7 +281,6 @@
   <a href="#contact" class="nav-link">Contact</a>
 <button id="themeToggle" onclick="toggleTheme()" class="hover:underline text-rose-500">🌙</button>
 </nav>
-</nav>
 
 <section id="home" class="text-center py-12">
   <h2 class="text-3xl font-bold text-rose-600">Welcome to Sara Crafts</h2>
@@ -291,13 +292,13 @@
   <h2 class="text-2xl font-semibold text-rose-500 mb-6">Sliding Showcase</h2>
   <div class="swiper mySwiper w-full max-w-4xl mx-auto">
     <div class="swiper-wrapper">
-      <div class="swiper-slide"><img src="assets/images/plates.jpeg" /></div>
-      <div class="swiper-slide"><img src="assets/images/bridal.jpeg" /></div>
-      <div class="swiper-slide"><img src="assets/images/Gifts.jpeg" /></div>
-      <div class="swiper-slide"><img src="assets/images/henna.jpg" /></div>
-      <div class="swiper-slide"><img src="assets/images/red henna.jpg" /></div>
-      <div class="swiper-slide"><img src="assets/images/making.jpg" /></div>
-       <div class="swiper-slide"><img src="assets/images/saree.jpg" /></div>
+      <div class="swiper-slide"><img src="assets/images/plates.jpeg" alt="Decorated plates" /></div>
+      <div class="swiper-slide"><img src="assets/images/bridal.jpeg" alt="Bridal makeup" /></div>
+      <div class="swiper-slide"><img src="assets/images/Gifts.jpeg" alt="Customized gifts" /></div>
+      <div class="swiper-slide"><img src="assets/images/henna.jpg" alt="Henna design" /></div>
+      <div class="swiper-slide"><img src="assets/images/red henna.jpg" alt="Bridal henna" /></div>
+      <div class="swiper-slide"><img src="assets/images/making.jpg" alt="Artisan at work" /></div>
+       <div class="swiper-slide"><img src="assets/images/saree.jpg" alt="Saree pre-pleating" /></div>
     </div>
   </div>
 </section>
@@ -305,13 +306,13 @@
 <!-- Marquee -->
 <section class="bg-rose-100 py-4">
   <div class="marquee">
-    <img src="assets/images/plates.jpeg" class="inline-block h-32 mx-4 rounded-xl" />
-    <img src="assets/images/bridal.jpeg" class="inline-block h-32 mx-4 rounded-xl" />
-    <img src="assets/images/Gifts.jpeg" class="inline-block h-32 mx-4 rounded-xl" />
-    <img src="assets/images/henna.jpg" class="inline-block h-32 mx-4 rounded-xl" />
-    <img src="assets/images/red henna.jpg" class="inline-block h-32 mx-4 rounded-xl" />
-    <img src="assets/images/making.jpg" class="inline-block h-32 mx-4 rounded-xl" />
-    <img src="assets/images/saree.jpg" class="inline-block h-32 mx-4 rounded-xl" />
+    <img src="assets/images/plates.jpeg" class="inline-block h-32 mx-4 rounded-xl" alt="Decorated plates" />
+    <img src="assets/images/bridal.jpeg" class="inline-block h-32 mx-4 rounded-xl" alt="Bridal makeup" />
+    <img src="assets/images/Gifts.jpeg" class="inline-block h-32 mx-4 rounded-xl" alt="Customized gifts" />
+    <img src="assets/images/henna.jpg" class="inline-block h-32 mx-4 rounded-xl" alt="Henna design" />
+    <img src="assets/images/red henna.jpg" class="inline-block h-32 mx-4 rounded-xl" alt="Bridal henna" />
+    <img src="assets/images/making.jpg" class="inline-block h-32 mx-4 rounded-xl" alt="Artisan at work" />
+    <img src="assets/images/saree.jpg" class="inline-block h-32 mx-4 rounded-xl" alt="Saree pre-pleating" />
  </div>
 </section>
 <!-- 🔻 Everything before remains the same (head, styles, nav, swiper, marquee) -->
@@ -451,7 +452,7 @@
 <!-- Removed: Admin Login & Placeholder -->
 
 <!-- Back to Top -->
-<button id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">❤️</button>
+<button id="backToTop" onclick="scrollToTop()">❤️</button>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -459,23 +460,27 @@
 
 <script>
   // Init AOS (animations on scroll)
-  AOS.init();
+  if (window.AOS) {
+    AOS.init();
+  }
 
   // Init Swiper
-  new Swiper(".mySwiper", {
-    loop: true,
-    autoplay: { delay: 3000, disableOnInteraction: false },
-    effect: "coverflow",
-    centeredSlides: true,
-    slidesPerView: "auto",
-    coverflowEffect: {
-      rotate: 20,
-      stretch: 0,
-      depth: 150,
-      modifier: 1,
-      slideShadows: true,
-    },
-  });
+  if (window.Swiper) {
+    new Swiper(".mySwiper", {
+      loop: true,
+      autoplay: { delay: 3000, disableOnInteraction: false },
+      effect: "coverflow",
+      centeredSlides: true,
+      slidesPerView: "auto",
+      coverflowEffect: {
+        rotate: 20,
+        stretch: 0,
+        depth: 150,
+        modifier: 1,
+        slideShadows: true,
+      },
+    });
+  }
 
   // Back to Top Button
   window.onscroll = function () {
@@ -568,16 +573,14 @@
 
 <!-- WhatsApp Floating Button (Bottom Left) -->
 <a href="https://wa.me/919791315227?text=Hi%20Sara%20Crafts!%20I%20visited%20your%20website%20and%20want%20to%20know%20more." 
-   class="whatsapp-float" target="_blank" title="Chat on WhatsApp">
+   class="whatsapp-float" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp">
   <img src="https://img.icons8.com/color/48/000000/whatsapp--v1.png" alt="WhatsApp">
 </a>
 
 <!-- Instagram Floating Button (Bottom Center) -->
 <a href="https://instagram.com/saracrafts2020" 
-   class="insta-float" target="_blank" title="Follow us on Instagram">
+   class="insta-float" target="_blank" rel="noopener noreferrer" title="Follow us on Instagram">
   <img src="https://img.icons8.com/fluency/48/instagram-new.png" alt="Instagram">
 </a>
-
-<button id="backToTop" onclick="scrolltop()">❤</button>
 </body>
 </html>
