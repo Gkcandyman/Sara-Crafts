@@ -1,4 +1,4 @@
-const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
+const API_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5050' : '';
 
 const state = {
   activeSection: 'dashboard',
