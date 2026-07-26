@@ -1,7 +1,7 @@
 const API_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5050' : '';
 const LANDING_ENTRY_KEY = 'saraCraftsEnteredWebsite';
 const LOADER_MIN_DURATION = 1300;
-const PAYMENT_QR_IMAGE_SRC = 'assets/images/google-pay-qr.jpeg';
+const PAYMENT_QR_IMAGE_SRC = 'assets/images/payment-qr.jpeg';
 const loaderStartedAt = Date.now();
 
 if (shouldReturnToLanding()) {
